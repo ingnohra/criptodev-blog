@@ -62,6 +62,19 @@
   <p>Queda un problema sin resolver, ¿cómo sabe Bernardo que la clave pública que está usando es realmente de Alicia y no de un atacante que se hizo pasar por ella? La respuesta es el certificado digital, que garantiza que una clave pública pertenece al usuario especificado en él (Hernández, 2016). Esa garantía la da una autoridad de certificación (AC), una especie de notario electrónico.</p>
   <p>Los certificados más usados siguen el estándar X.509, y contienen número de serie, algoritmo de firma empleado, autoridad emisora, identificación del usuario, su clave pública, período de validez (tradicionalmente 2 o 3 años) y la firma digital de la propia autoridad (Hernández, 2016). Esta infraestructura, la PKI, es la que sostiene la autenticación de servidores en HTTPS que vimos en la Entrada 3.</p>
 
+  <div class="video-embed">
+    <iframe
+      width="100%"
+      height="400"
+      src="https://www.youtube.com/embed/12W3TnbvXSc"
+      title="Certificado digital autofirmado (Estándar X.509)"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+    <p class="video-caption">Cómo se estructura y valida un certificado digital bajo el estándar X.509.</p>
+  </div>
+  
   <h2>Recomendaciones, y cómo aterrizan en cada fase del SDLC</h2>
   <div class="callout"><strong>Diseño:</strong> elegir una función resumen moderna desde el inicio, SHA-256 o superior. Algoritmos como MD5 o SHA-1 ya no ofrecen las garantías necesarias.</div>
   <div class="callout"><strong>Construcción:</strong> la clave privada del firmante se trata con el mismo cuidado que cualquier otra clave privada, todo lo dicho en las Entradas 1 y 4 sobre keystores y gestores de secretos aplica igual acá.</div>
