@@ -598,3 +598,27 @@ pre {
     transform: none;
   }
 }
+
+/* ---------- Video incrustado (YouTube) ---------- */
+
+.video-embed {
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--paper-line);
+}
+
+.video-embed iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.video-caption {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  padding: 0.7rem 1rem;
+  background: var(--paper);
+  margin: 0;
+}
