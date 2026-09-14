@@ -577,3 +577,24 @@ code[class*="language-"] {
 .token.punctuation { color: #B9C4D6; }
 .token.operator { color: #E9E2D0; }
 .token.annotation { color: #B5651D; }
+
+/* ---------- Ensanchar bloques de código en pantallas grandes ---------- */
+
+pre {
+  width: 100vw;
+  max-width: 900px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+@media (max-width: 760px) {
+  pre {
+    width: 100%;
+    max-width: 100%;
+    position: static;
+    left: auto;
+    transform: none;
+  }
+}
