@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CriptoDev</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CriptoDev - Criptografía Asimétrica y SDLC</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -21,63 +21,97 @@
 
 <main>
   <section class="hero">
-    <div class="eyebrow-series">Blog académico - cifrado asimétrico</div>
-    <h1>CriptoDev - Fundamentos de Criptografía Asimétrica y Seguridad en el SDLC</h1>
-    <p class="byline">Por Nohra Vizcaíno</p>
-    <p class="lead">Explora la seguridad en el desarrollo de software a través de cinco entradas fundamentadas y dinámicas. Cada apartado combina el rigor analítico de los criptosistemas de clave pública con herramientas interactivas que permiten ejecutar, evaluar y visualizar los algoritmos en acción, trascendiendo la lectura teórica.</p>
+    <div class="meta-pills">
+      <span class="eyebrow-series">Blog Académico</span>
+      <span class="eyebrow-subject">Seguridad en el Desarrollo de Software</span>
+    </div>
+    
+    <h1>CriptoDev: Fundamentos de Criptografía Asimétrica y Seguridad en el SDLC</h1>
+    
+    <div class="author-block">
+      <span class="byline">Por Nohra Vizcaíno</span>
+      <span class="institution">• UNIMINUTO</span>
+    </div>
+    
+    <p class="lead">
+      Explora la seguridad en el desarrollo de software a través de cinco entradas fundamentadas y dinámicas. Cada apartado combina el rigor analítico de los criptosistemas de clave pública con herramientas interactivas que permiten ejecutar, evaluar y visualizar los algoritmos en acción, trascendiendo la lectura teórica.
+    </p>
   </section>
+
+  <hr class="section-divider">
+
+  <h2 class="section-title">Entradas de la Serie</h2>
 
   <ul class="entry-list">
     <li>
-      <a href="entrada1.html">
+      <a href="entrada1.html" class="entry-card">
         <span class="seal">1</span>
-        <span>
-          <span class="entry-title">Las dos llaves que resolvieron un problema de 1976</span>
-          <span class="entry-teaser">Diffie-Hellman, la función de escotilla y cómo se gestionan las claves en desarrollo. Con calculadora de intercambio de claves.</span>
-        </span>
+        <div class="entry-content">
+          <div class="entry-header-card">
+            <span class="entry-title">Las dos llaves que resolvieron un problema de 1976</span>
+            <span class="badge-interactive">⚡ Calculadora DHKA</span>
+          </div>
+          <span class="entry-teaser">Diffie-Hellman, la función de escotilla y cómo se gestionan las claves en desarrollo. Con simulador de intercambio de claves.</span>
+        </div>
       </a>
     </li>
+
     <li>
-      <a href="entrada2.html">
+      <a href="entrada2.html" class="entry-card">
         <span class="seal">2</span>
-        <span>
-          <span class="entry-title">RSA, ElGamal y curvas elípticas: tres formas de resolver el mismo problema</span>
-          <span class="entry-teaser">Cómo se generan y usan las claves en cada algoritmo. Con calculadoras de RSA y ElGamal en vivo.</span>
-        </span>
+        <div class="entry-content">
+          <div class="entry-header-card">
+            <span class="entry-title">RSA, ElGamal y curvas elípticas: tres formas de resolver el mismo problema</span>
+            <span class="badge-interactive">⚡ Motor RSA/ElGamal</span>
+          </div>
+          <span class="entry-teaser">Cómo se generan y usan las claves en cada algoritmo. Con calculadoras matemáticas de exponenciación modular en vivo.</span>
+        </div>
       </a>
     </li>
+
     <li>
-      <a href="entrada3.html">
+      <a href="entrada3.html" class="entry-card">
         <span class="seal">3</span>
-        <span>
-          <span class="entry-title">Por qué nadie usa solo cifrado simétrico o solo asimétrico</span>
-          <span class="entry-teaser">Comparativa n² contra 2n, y por qué el mundo real usa sistemas híbridos como TLS.</span>
-        </span>
+        <div class="entry-content">
+          <div class="entry-header-card">
+            <span class="entry-title">Por qué nadie usa solo cifrado simétrico o solo asimétrico</span>
+            <span class="badge-interactive">⚡ Demo Cifrado Híbrido</span>
+          </div>
+          <span class="entry-teaser">Comparativa n² contra 2n, y por qué el mundo real usa sistemas híbridos combinados como TLS/HTTPS.</span>
+        </div>
       </a>
     </li>
+
     <li>
-      <a href="entrada4.html">
+      <a href="entrada4.html" class="entry-card">
         <span class="seal">4</span>
-        <span>
-          <span class="entry-title">RSA en Java, del papel al código que sí compila</span>
-          <span class="entry-teaser">Modelado de amenazas, el código Java real, y una demo de cifrado RSA que corre en tu propio navegador.</span>
-        </span>
+        <div class="entry-content">
+          <div class="entry-header-card">
+            <span class="entry-title">RSA en Java, del papel al código que sí compila</span>
+            <span class="badge-interactive">⚡ Playground Java/RSA</span>
+          </div>
+          <span class="entry-teaser">Modelado de amenazas, gestión de claves en el SDLC, código Java nativo y demo interactiva corriendo en el navegador.</span>
+        </div>
       </a>
     </li>
+
     <li>
-      <a href="entrada5.html">
+      <a href="entrada5.html" class="entry-card">
         <span class="seal">5</span>
-        <span>
-          <span class="entry-title">Firma digital y certificados, quién responde por esa clave pública</span>
-          <span class="entry-teaser">El protocolo de firma, los certificados X.509, y una demo real de firmar y verificar en el navegador.</span>
-        </span>
+        <div class="entry-content">
+          <div class="entry-header-card">
+            <span class="entry-title">Firma digital y certificados, quién responde por esa clave pública</span>
+            <span class="badge-interactive">⚡ Firmador / Verificador</span>
+          </div>
+          <span class="entry-teaser">El protocolo de firma digital, certificados X.509, vulnerabilidad cuántica (Shor/QKD) y validador de integridad SHA-256.</span>
+        </div>
       </a>
     </li>
   </ul>
 </main>
 
 <footer>
-  Nohra Vizcaíno - Blog académico - Seguridad en el Desarrollo de Software · UNIMINUTO
+  Nohra Vizcaíno - Blog académico · Seguridad en el Desarrollo de Software · UNIMINUTO
 </footer>
 
 </body>
