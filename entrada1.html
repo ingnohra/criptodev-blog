@@ -72,6 +72,19 @@
 
   <p>¿Y qué pasa si alguien intercepta ambos valores? Se enfrenta al problema del logaritmo discreto (DLP), es decir, calcular el exponente secreto a partir del generador y la potencia resultante (Hernández, 2016). Con números como los del ejemplo, trivial. Pero cuando p es un primo de cientos de dígitos, como se usa en la práctica, ese cálculo se vuelve inviable con la tecnología de hoy.</p>
 
+  <div class="video-embed">
+    <iframe
+      width="100%"
+      height="400"
+      src="https://www.youtube.com/embed/85oMrKd8afY"
+      title="Diffie-Hellman Key Exchange: How to Share a Secret"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+    <p class="video-caption">Demostración física del intercambio de claves Diffie-Hellman con mezcla de pinturas (Royal Institution, Christmas Lectures 2008).</p>
+  </div>
+  
   <h2>Lo que el protocolo no resuelve, y cómo se maneja en el día a día del desarrollo</h2>
   <p>El DHKA resuelve la distribución del secreto, pero deja una grieta muy concreta, no autentica a nadie. Un atacante puede interponerse entre cliente y servidor (ataque Man-in-the-Middle) si no hay forma de verificar quién es quién de verdad. Por eso ningún equipo serio implementa clave pública sin nada más alrededor, la combinan con certificados digitales (PKI) y firmas digitales, de modo que la clave pública del servidor queda firmada antes de acordar nada.</p>
   <p>En la práctica, esto se traduce en reglas bastante concretas sobre cómo un equipo maneja sus claves:</p>
