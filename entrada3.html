@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Por qué nadie usa solo cifrado simétrico o solo asimétrico — CriptoDev</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">CriptoDev</a>
+  <ul class="entries">
+    <li><a href="entrada1.html">1</a></li>
+    <li><a href="entrada2.html">2</a></li>
+    <li><a href="entrada3.html" class="active">3</a></li>
+    <li><a href="entrada4.html">4</a></li>
+    <li><a href="entrada5.html">5</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="eyebrow-series">CriptoDev · Entrada 3 de 5</div>
+  <div class="entry-header">
+    <span class="seal">3</span>
+    <h1>Por qué nadie usa solo cifrado simétrico o solo asimétrico</h1>
+  </div>
+
+  <p>Ya vimos cómo funciona el cifrado asimétrico y qué algoritmos lo sostienen. Pero ninguna aplicación real se queda con uno solo de los dos enfoques. Aquí comparamos ambos y vemos por qué, en la práctica, un equipo de desarrollo casi nunca elige entre uno u otro, sino que combina los dos desde el diseño de la arquitectura.</p>
+
+  <h2>Gestión de claves, n² contra 2n</h2>
+  <p>La diferencia más costosa entre ambos sistemas no es matemática, es operativa. En un criptosistema simétrico hace falta una clave distinta para cada par de interlocutores. Si en una red hay n nodos y todos necesitan hablar entre sí de forma segura, el número de claves crece de forma exponencial, n² claves (Maillo, 2017). En uno asimétrico, cada participante genera un único par sin importar con cuántos otros se comunique, el crecimiento es lineal, 2n claves para toda la red (Maillo, 2017).</p>
+
+  <div class="demo" id="scale-demo">
+    <h3>Compara cómo escala cada modelo</h3>
+    <div class="demo-row">
+      <div class="demo-field"><label for="scale-n">Número de usuarios en la red</label><input id="scale-n" type="number" value="10" min="2" oninput="calcularEscala()"></div>
+    </div>
+    <div class="demo-output" id="scale-output"></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Criterio</th><th>Simétrico</th><th>Asimétrico</th></tr></thead>
+    <tbody>
+      <tr><td>Gestión de claves</td><td>n² para n usuarios</td><td>2n en total</td></tr>
+      <tr><td>Longitud típica de clave</td><td>128 bits</td><td>1.024 bits</td></tr>
+      <tr><td>Vida útil de la clave</td><td>Corta, cambia por sesión</td><td>Larga, meses o años</td></tr>
+      <tr><td>Velocidad</td><td>Alta, cientos de MB/s</td><td>Baja, cientos de KB/s</td></tr>
+      <tr><td>Autenticación del emisor</td><td>No la da por sí solo</td><td>Sí, con firma digital</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.85rem; color:var(--ink-soft);">Longitudes según Maillo (2017). En despliegues actuales es común ver AES-256 y RSA-2048/4096, cifras superiores a las del libro pero con la misma proporción entre ambos sistemas.</p>
+
+  <h2>El sistema híbrido, y por qué se decide en la fase de diseño</h2>
+  <p>Puestas una junto a otra, las dos tecnologías se compensan solas, el asimétrico gestiona mejor las claves y autentica, pero es lento; el simétrico es rápido, pero exige haber compartido antes la clave y no escala con el número de participantes (Maillo, 2017). Ningún sistema real cifra volúmenes grandes con un algoritmo asimétrico, sería demasiado lento, ni resuelve el intercambio inicial con uno simétrico, porque ese es justo el problema que la clave pública vino a resolver.</p>
+
+  <p>La salida que adoptó la industria es un criptosistema híbrido, se usa cifrado asimétrico solo para resolver la distribución (cifrar una clave simétrica de sesión, generada al azar para esa comunicación puntual) y luego cifrado simétrico, mucho más rápido, para el resto de los datos (Maillo, 2017). El receptor descifra la clave de sesión con su privada, y de ahí en adelante todo sigue con el algoritmo simétrico.</p>
+
+  <p>Y esto no es una decisión que se toma en el código, se toma antes, en la arquitectura. Cuando un equipo diseña un servicio que va a exponerse por HTTPS, la elección de usar TLS ya trae ese modelo híbrido incorporado, así que la decisión real del desarrollador no es "¿simétrico o asimétrico?", sino qué biblioteca TLS usar, qué versión del protocolo exigir, y cómo se gestionan los certificados del servidor.</p>
+
+  <p>Este esquema es exactamente el mecanismo detrás de la navegación segura por HTTPS. Cuando un navegador se conecta a un servidor mediante TLS, ambas partes usan cifrado asimétrico solo para acordar una clave de sesión, y el resto del tráfico se cifra con un algoritmo simétrico veloz (Hernández, 2016). Hernández (2016) señala además que el antecesor de TLS, el protocolo SSL, dejó de considerarse seguro desde 2014, un recordatorio de que ni los estándares de cifrado son eternos, y de que revisar qué protocolos siguen vigentes debería ser parte del mantenimiento normal de cualquier sistema, no una sorpresa.</p>
+
+  <p style="font-size:0.88rem; color:var(--ink-soft); font-style:italic;">Otros ejemplos habituales de este mismo patrón híbrido, como SSH y PGP/GPG, no aparecen en las fuentes básicas de esta actividad, se mencionan solo como referencia de que el principio se repite en distintos protocolos.</p>
+
+  <div class="references">
+    <p>Hernández, L. (2016). Criptografía de clave asimétrica. En <em>La criptografía</em> (pp. 93-134). Editorial CSIC Consejo Superior de Investigaciones Científicas.</p>
+    <p>Maillo Fernández, J. A. (2017). Seguridad de la información. En <em>Sistemas seguros de acceso y transmisión de datos</em> (pp. 76-102). RA-MA Editorial.</p>
+  </div>
+
+  <div class="entry-pager">
+    <a class="to-prev" href="entrada2.html"><span>Anterior</span>← RSA, ElGamal y curvas elípticas</a>
+    <a class="to-next" href="entrada4.html"><span>Siguiente</span>RSA en Java →</a>
+  </div>
+</main>
+
+<footer>Proyecto académico — Seguridad en el Desarrollo de Software · UNIMINUTO</footer>
+
+<script>
+function calcularEscala() {
+  const n = parseInt(document.getElementById('scale-n').value) || 0;
+  const sym = n * n;
+  const asym = 2 * n;
+  document.getElementById('scale-output').innerHTML =
+    `Con ${n} usuarios:\nSimétrico necesitaría  ${sym} claves (n²)\nAsimétrico necesitaría ${asym} claves (2n)\n<span class="${sym > asym ? 'ok' : ''}">La brecha ${sym > asym ? `es de ${sym - asym} claves` : 'aún no se nota con pocos usuarios'}</span>`;
+}
+calcularEscala();
+</script>
+
+</body>
+</html>

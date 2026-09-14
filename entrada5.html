@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firma digital y certificados — CriptoDev</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">CriptoDev</a>
+  <ul class="entries">
+    <li><a href="entrada1.html">1</a></li>
+    <li><a href="entrada2.html">2</a></li>
+    <li><a href="entrada3.html">3</a></li>
+    <li><a href="entrada4.html">4</a></li>
+    <li><a href="entrada5.html" class="active">5</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="eyebrow-series">CriptoDev · Entrada 5 de 5</div>
+  <div class="entry-header">
+    <span class="seal">5</span>
+    <h1>Firma digital y certificados, quién responde por esa clave pública</h1>
+  </div>
+
+  <p>Cerramos respondiendo la segunda pregunta orientadora de esta actividad, qué es la firma digital y por qué importa. Quedó pendiente desde la Entrada 1, el DHKA resuelve la distribución de claves, pero no prueba quién envió qué. Esta entrada cierra esa brecha.</p>
+
+  <h2>Cómo funciona la firma digital</h2>
+  <p>La firma electrónica es un protocolo criptográfico que demuestra la autoría y autenticidad de un documento digital, y requiere un criptosistema asimétrico para implementarse (Hernández, 2016). A diferencia de una firma manuscrita, que es siempre la misma sin importar el documento, cada firma digital es única para cada combinación de documento y firmante.</p>
+  <p>Si Alicia quiere firmar un documento m: calcula el resumen (hash) del documento con una función pública obteniendo r; cifra ese resumen, no el documento completo, con su clave privada, obteniendo la firma s; y publica el documento junto con su firma, (m, s). Bernardo, para verificar, calcula el resumen del documento recibido con la misma función, descifra la firma usando la clave pública de Alicia, y compara ambos resúmenes (Hernández, 2016).</p>
+
+  <div class="demo" id="sign-demo">
+    <h3>Firma un mensaje y verifícalo, aquí mismo</h3>
+    <p style="margin-top:0; font-size:0.9rem; color:var(--ink-soft);">Firma digital real (RSASSA-PKCS1-v1_5 con SHA-256) generada con la Web Crypto API del navegador.</p>
+    <div class="demo-row">
+      <div class="demo-field"><label for="sig-msg">Documento a firmar</label><input id="sig-msg" type="text" value="Autorizo el pago del reporte PQRS N.º 4521"></div>
+    </div>
+    <button onclick="firmarMensaje()">Generar claves y firmar</button>
+    <div class="demo-output" id="sig-output">Presiona el botón para firmar el documento.</div>
+
+    <div class="demo-row" style="margin-top:1rem;">
+      <div class="demo-field"><label for="verify-msg">Documento a verificar (cámbialo para simular manipulación)</label><input id="verify-msg" type="text" value="Autorizo el pago del reporte PQRS N.º 4521"></div>
+    </div>
+    <button onclick="verificarMensaje()">Verificar firma</button>
+    <div class="demo-output" id="verify-output"></div>
+    <p class="demo-note">Prueba a cambiar una sola letra del documento a verificar, la firma se rechaza aunque uses la clave pública correcta.</p>
+  </div>
+
+  <p>¿Por qué se firma el resumen y no el documento completo? Porque firmar el documento entero con RSA sin pasar antes por una función resumen deja el sistema expuesto a los mismos ataques que vimos en la Entrada 2, y además la firma queda de tamaño fijo, sin importar qué tan largo sea el original.</p>
+
+  <h2>Los tres pilares que garantiza</h2>
+  <p>Hernández (2016) y Maillo (2017) coinciden en que una firma digital bien implementada garantiza tres cosas. <strong>Autenticidad</strong>, identifica al firmante sin ambigüedad, porque solo él tiene la clave privada. <strong>Integridad</strong>, si el documento se modifica después de firmado, los resúmenes no coinciden y la firma se rechaza. <strong>No repudio</strong>, el firmante no puede negar haber firmado, porque solo su clave privada pudo haber producido esa firma.</p>
+  <p>En Colombia esta validez legal está en la Ley 527 de 1999, que le da a los mensajes de datos y a la firma digital el mismo valor probatorio que a los documentos manuscritos, en la misma línea que la Ley 59/2003 española que documenta Hernández (2016).</p>
+
+  <h2>Certificados digitales, quién garantiza que esa clave pública es real</h2>
+  <p>Queda un problema sin resolver, ¿cómo sabe Bernardo que la clave pública que está usando es realmente de Alicia y no de un atacante que se hizo pasar por ella? La respuesta es el certificado digital, que garantiza que una clave pública pertenece al usuario especificado en él (Hernández, 2016). Esa garantía la da una autoridad de certificación (AC), una especie de notario electrónico.</p>
+  <p>Los certificados más usados siguen el estándar X.509, y contienen número de serie, algoritmo de firma empleado, autoridad emisora, identificación del usuario, su clave pública, período de validez (tradicionalmente 2 o 3 años) y la firma digital de la propia autoridad (Hernández, 2016). Esta infraestructura, la PKI, es la que sostiene la autenticación de servidores en HTTPS que vimos en la Entrada 3.</p>
+
+  <h2>Recomendaciones, y cómo aterrizan en cada fase del SDLC</h2>
+  <div class="callout"><strong>Diseño:</strong> elegir una función resumen moderna desde el inicio, SHA-256 o superior. Algoritmos como MD5 o SHA-1 ya no ofrecen las garantías necesarias.</div>
+  <div class="callout"><strong>Construcción:</strong> la clave privada del firmante se trata con el mismo cuidado que cualquier otra clave privada, todo lo dicho en las Entradas 1 y 4 sobre keystores y gestores de secretos aplica igual acá.</div>
+  <div class="callout"><strong>Validación en tiempo de ejecución:</strong> revisar la cadena completa de certificados, no solo el final. Un certificado X.509 es tan confiable como la autoridad que lo firmó.</div>
+  <div class="callout"><strong>Mantenimiento a largo plazo:</strong> vigilar la vigencia de los protocolos. Hernández (2016) documenta que el algoritmo de Shor podría resolver el problema de factorización del que depende RSA; la respuesta que plantea el autor es la distribución cuántica de claves (QKD), protocolos como BB84.</div>
+
+  <div class="references">
+    <p>Hernández, L. (2016). Criptografía de clave asimétrica. En <em>La criptografía</em> (pp. 93-134). Editorial CSIC Consejo Superior de Investigaciones Científicas.</p>
+    <p>Maillo Fernández, J. A. (2017). Seguridad de la información. En <em>Sistemas seguros de acceso y transmisión de datos</em> (pp. 76-102). RA-MA Editorial.</p>
+  </div>
+
+  <div class="entry-pager">
+    <a class="to-prev" href="entrada4.html"><span>Anterior</span>← RSA en Java</a>
+    <a class="to-next" href="index.html"><span>Volver</span>Inicio</a>
+  </div>
+</main>
+
+<footer>Proyecto académico — Seguridad en el Desarrollo de Software · UNIMINUTO</footer>
+
+<script>
+let signKeyPair = null;
+let lastSignature = null;
+let lastSignedMessage = null;
+
+async function firmarMensaje() {
+  const out = document.getElementById('sig-output');
+  const msg = document.getElementById('sig-msg').value;
+  out.textContent = 'Generando par de claves y firmando...';
+
+  try {
+    signKeyPair = await crypto.subtle.generateKey(
+      { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash: 'SHA-256' },
+      true,
+      ['sign', 'verify']
+    );
+    const encoded = new TextEncoder().encode(msg);
+    const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', signKeyPair.privateKey, encoded);
+    lastSignature = signature;
+    lastSignedMessage = msg;
+
+    const sigBase64 = btoa(String.fromCharCode(...new Uint8Array(signature))).slice(0, 80) + '...';
+    out.innerHTML = `Documento firmado: "${msg}"\nFirma (Base64, primeros 80 caracteres): ${sigBase64}\n<span class="ok">Clave privada generada y usada. Copia el documento de abajo (o cámbialo) y verifica.</span>`;
+    document.getElementById('verify-msg').value = msg;
+  } catch (err) {
+    out.innerHTML = '<span class="fail">Error: ' + err.message + '</span>';
+  }
+}
+
+async function verificarMensaje() {
+  const out = document.getElementById('verify-output');
+  if (!signKeyPair || !lastSignature) {
+    out.innerHTML = '<span class="fail">Primero firma un documento arriba.</span>';
+    return;
+  }
+  const msgToVerify = document.getElementById('verify-msg').value;
+  try {
+    const encoded = new TextEncoder().encode(msgToVerify);
+    const isValid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', signKeyPair.publicKey, lastSignature, encoded);
+    if (isValid) {
+      out.innerHTML = `<span class="ok">Firma válida. El documento no fue alterado desde que se firmó.</span>`;
+    } else {
+      out.innerHTML = `<span class="fail">Firma inválida. El documento fue modificado (o no coincide con el que se firmó), la verificación lo detecta.</span>`;
+    }
+  } catch (err) {
+    out.innerHTML = '<span class="fail">Error: ' + err.message + '</span>';
+  }
+}
+</script>
+
+</body>
+</html>

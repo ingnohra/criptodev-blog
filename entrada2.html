@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSA, ElGamal y curvas elípticas — CriptoDev</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">CriptoDev</a>
+  <ul class="entries">
+    <li><a href="entrada1.html">1</a></li>
+    <li><a href="entrada2.html" class="active">2</a></li>
+    <li><a href="entrada3.html">3</a></li>
+    <li><a href="entrada4.html">4</a></li>
+    <li><a href="entrada5.html">5</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="eyebrow-series">CriptoDev · Entrada 2 de 5</div>
+  <div class="entry-header">
+    <span class="seal">2</span>
+    <h1>RSA, ElGamal y curvas elípticas: tres formas de resolver el mismo problema</h1>
+  </div>
+
+  <p>En la entrada anterior vimos que un criptosistema asimétrico se sostiene sobre una función de escotilla, fácil de calcular en un sentido, imposible de invertir sin la clave privada. Esa idea general se materializa distinto según el problema matemático detrás de cada algoritmo. Aquí recorremos los tres más usados, RSA, ElGamal y curvas elípticas, y por qué la elección entre ellos ya es una decisión de diseño, no solo un detalle técnico.</p>
+
+  <h2>RSA, seguridad basada en factorizar números enormes</h2>
+  <p>RSA, nombrado por sus creadores Rivest, Shamir y Adleman, es el criptosistema asimétrico más usado hoy. Su fortaleza está en que generar las claves es sencillo, mientras que revertir el proceso sin la clave privada resulta computacionalmente inviable (Hernández, 2016).</p>
+  <p>La generación de claves sigue tres pasos (Hernández, 2016; Maillo, 2017): se eligen dos primos p y q, se calcula n = p·q; se calcula φ(n) = (p−1)(q−1) y se elige un exponente público e primo relativo con φ(n); y finalmente se calcula d, el inverso de e módulo φ(n). La clave pública es (n, e); la privada es d.</p>
+
+  <div class="demo" id="rsa-demo">
+    <h3>Genera tu propio par de claves RSA</h3>
+    <p style="margin-top:0; font-size:0.9rem; color:var(--ink-soft);">Usa primos pequeños para que el cálculo sea legible (en producción serían de 1024+ bits).</p>
+    <div class="demo-row">
+      <div class="demo-field"><label for="rsa-p">Primo p</label><input id="rsa-p" type="number" value="11"></div>
+      <div class="demo-field"><label for="rsa-q">Primo q</label><input id="rsa-q" type="number" value="13"></div>
+      <div class="demo-field"><label for="rsa-e">Exponente público e</label><input id="rsa-e" type="number" value="7"></div>
+    </div>
+    <button onclick="generarRSA()">Generar claves</button>
+    <div class="demo-output" id="rsa-keys-output">Presiona "Generar claves" primero.</div>
+
+    <div class="demo-row" style="margin-top:1rem;">
+      <div class="demo-field"><label for="rsa-m">Mensaje (número menor a n)</label><input id="rsa-m" type="number" value="9"></div>
+    </div>
+    <button onclick="cifrarRSA()">Cifrar y descifrar</button>
+    <div class="demo-output" id="rsa-msg-output"></div>
+  </div>
+
+  <p>La seguridad del esquema descansa en el problema de la factorización, si un atacante pudiera factorizar n con facilidad, obtendría p y q, calcularía φ(n) y de ahí d, rompiendo el sistema (Hernández, 2016). Por eso la elección del tamaño de los primos no es un detalle de configuración cualquiera, es la decisión de diseño de la que depende toda la seguridad del sistema.</p>
+
+  <h2>ElGamal, el mismo logaritmo discreto que ya conocemos</h2>
+  <p>A diferencia de RSA, ElGamal no depende de la factorización sino del problema del logaritmo discreto (DLP), el mismo que vimos con Diffie-Hellman en la entrada pasada (Hernández, 2016). Alicia elige un primo p y un generador g, escoge su clave privada a, y calcula su pública A = g^a mod p. Para cifrar, Bernardo elige un número aleatorio x, calcula r = g^x mod p y s = m·A^x mod p, y envía el par (r, s).</p>
+
+  <div class="demo" id="elgamal-demo">
+    <h3>Cifra un mensaje con ElGamal</h3>
+    <div class="demo-row">
+      <div class="demo-field"><label for="eg-p">Primo p</label><input id="eg-p" type="number" value="23"></div>
+      <div class="demo-field"><label for="eg-g">Generador g</label><input id="eg-g" type="number" value="5"></div>
+      <div class="demo-field"><label for="eg-a">Clave privada a</label><input id="eg-a" type="number" value="6"></div>
+    </div>
+    <div class="demo-row">
+      <div class="demo-field"><label for="eg-x">Aleatorio de Bernardo (x)</label><input id="eg-x" type="number" value="15"></div>
+      <div class="demo-field"><label for="eg-m">Mensaje m</label><input id="eg-m" type="number" value="10"></div>
+    </div>
+    <button onclick="calcularElGamal()">Cifrar y descifrar</button>
+    <div class="demo-output" id="eg-output">Presiona el botón para calcular.</div>
+  </div>
+
+  <p>Una diferencia práctica que vale la pena tener presente al elegir algoritmo, el criptograma de ElGamal ocupa el doble de espacio que el mensaje original, mientras que RSA mantiene el mismo tamaño. Por eso RSA terminó imponiéndose comercialmente (Hernández, 2016).</p>
+
+  <h2>Curvas elípticas, la misma seguridad con menos bits</h2>
+  <p>RSA y ElGamal necesitan al menos 2.048 bits para ofrecer seguridad adecuada, lo que complica su uso en dispositivos con poca capacidad, como tarjetas inteligentes (Hernández, 2016). Las curvas elípticas (ECC) resuelven esto con un criptosistema análogo a ElGamal, pero construido sobre el grupo de puntos de una curva elíptica en lugar del clásico Z*p.</p>
+
+  <table>
+    <thead><tr><th>Bits en ECC</th><th>Seguridad equivalente</th></tr></thead>
+    <tbody>
+      <tr><td>160 bits</td><td>1.024 bits en RSA / ElGamal</td></tr>
+      <tr><td>224 bits</td><td>2.048 bits en RSA / ElGamal</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.85rem; color:var(--ink-soft);">Equivalencias documentadas por Hernández (2016).</p>
+
+  <p>La contrapartida, la suma de puntos sobre la curva es más compleja que una multiplicación modular, y su seguridad depende del logaritmo discreto elíptico, la versión aditiva del problema que ya conocemos.</p>
+
+  <h2>Decisiones de diseño que se pagan (o se cobran) en producción</h2>
+  <p>Un algoritmo matemáticamente sólido puede volverse inseguro por errores de implementación, y esto es exactamente lo que un equipo de desarrollo debería tener presente desde la fase de diseño, no descubrirlo cuando ya está en producción. Maillo (2017) documenta varias vulnerabilidades reales de RSA que no tienen nada que ver con la factorización:</p>
+
+  <div class="callout"><strong>Claves débiles:</strong> primos mal elegidos que devuelven un criptograma idéntico al mensaje original.</div>
+  <div class="callout"><strong>Ataques de intermediario:</strong> alguien intercepta la entrega de la clave pública y entrega la suya propia en su lugar.</div>
+  <div class="callout"><strong>Ataques de módulo común:</strong> reutilizar el mismo par (p, q) para generar varias claves permite descifrar mensajes interceptados sin conocer ninguna clave privada.</div>
+  <div class="callout"><strong>Exponente bajo y falta de padding:</strong> exponentes demasiado pequeños vuelven el sistema vulnerable, por eso el relleno de bits (padding) no es opcional en código de producción.</div>
+
+  <p>Cada una de estas fallas es, en el fondo, una decisión de arquitectura que se tomó (o se dejó de tomar) antes de escribir el código. En la Entrada 4 vemos cómo se traduce esto en el caso práctico con Java.</p>
+
+  <div class="references">
+    <p>Hernández, L. (2016). Criptografía de clave asimétrica. En <em>La criptografía</em> (pp. 93-134). Editorial CSIC Consejo Superior de Investigaciones Científicas.</p>
+    <p>Maillo Fernández, J. A. (2017). Seguridad de la información. En <em>Sistemas seguros de acceso y transmisión de datos</em> (pp. 76-102). RA-MA Editorial.</p>
+  </div>
+
+  <div class="entry-pager">
+    <a class="to-prev" href="entrada1.html"><span>Anterior</span>← Las dos llaves de 1976</a>
+    <a class="to-next" href="entrada3.html"><span>Siguiente</span>Simétrico vs. asimétrico →</a>
+  </div>
+</main>
+
+<footer>Proyecto académico — Seguridad en el Desarrollo de Software · UNIMINUTO</footer>
+
+<script src="js/crypto-utils.js"></script>
+<script>
+let rsaKeys = null;
+
+function generarRSA() {
+  const p = document.getElementById('rsa-p').value;
+  const q = document.getElementById('rsa-q').value;
+  const e = document.getElementById('rsa-e').value;
+  const out = document.getElementById('rsa-keys-output');
+
+  try {
+    const P = BigInt(p), Q = BigInt(q), E = BigInt(e);
+    if (!isPrime(P) || !isPrime(Q)) {
+      out.innerHTML = '<span class="fail">p y q deben ser números primos.</span>';
+      return;
+    }
+    const n = P * Q;
+    const phi = (P - 1n) * (Q - 1n);
+    const d = modInverse(E, phi);
+    if (d === null) {
+      out.innerHTML = `<span class="fail">e = ${e} no tiene inverso módulo φ(n) = ${phi}. Elige otro e que sea primo relativo con ${phi}.</span>`;
+      return;
+    }
+    rsaKeys = { n, phi, e: E, d };
+    out.innerHTML = `n = ${p} × ${q} = ${n}\nφ(n) = (${p}-1)(${q}-1) = ${phi}\nClave pública: (n=${n}, e=${e})\n<span class="ok">Clave privada: d = ${d}</span>`;
+  } catch (err) {
+    out.innerHTML = '<span class="fail">Revisa que los valores sean números válidos.</span>';
+  }
+}
+
+function cifrarRSA() {
+  const out = document.getElementById('rsa-msg-output');
+  if (!rsaKeys) {
+    out.innerHTML = '<span class="fail">Primero genera las claves arriba.</span>';
+    return;
+  }
+  const m = document.getElementById('rsa-m').value;
+  try {
+    const M = BigInt(m);
+    if (M >= rsaKeys.n) {
+      out.innerHTML = `<span class="fail">El mensaje debe ser menor que n = ${rsaKeys.n}.</span>`;
+      return;
+    }
+    const c = modPow(M, rsaKeys.e, rsaKeys.n);
+    const mDecrypted = modPow(c, rsaKeys.d, rsaKeys.n);
+    let lines = [];
+    lines.push(`Cifrado: c = ${m}^${rsaKeys.e} mod ${rsaKeys.n} = ${c}`);
+    lines.push(`Descifrado: m = ${c}^${rsaKeys.d} mod ${rsaKeys.n} = ${mDecrypted}`);
+    lines.push(mDecrypted === M ? `<span class="ok">Coincide con el mensaje original.</span>` : `<span class="fail">No coincide, revisa los valores.</span>`);
+    out.innerHTML = lines.join('\n');
+  } catch (err) {
+    out.innerHTML = '<span class="fail">Revisa que el mensaje sea un número válido.</span>';
+  }
+}
+
+function calcularElGamal() {
+  const p = document.getElementById('eg-p').value;
+  const g = document.getElementById('eg-g').value;
+  const a = document.getElementById('eg-a').value;
+  const x = document.getElementById('eg-x').value;
+  const m = document.getElementById('eg-m').value;
+  const out = document.getElementById('eg-output');
+
+  try {
+    const P = BigInt(p);
+    const A = modPow(g, a, p);
+    const r = modPow(g, x, p);
+    const Ax = modPow(A, x, p);
+    const s = ((BigInt(m) * Ax) % P + P) % P;
+    const t = modPow(r, (P - 1n - BigInt(a)), p);
+    const decrypted = ((t * s) % P + P) % P;
+
+    let lines = [];
+    lines.push(`Clave pública de Alicia: A = ${g}^${a} mod ${p} = ${A}`);
+    lines.push(`Bernardo cifra: r = ${g}^${x} mod ${p} = ${r}`);
+    lines.push(`             s = ${m} × ${A}^${x} mod ${p} = ${s}`);
+    lines.push(`Texto cifrado enviado: (r, s) = (${r}, ${s})`);
+    lines.push(`Alicia descifra: t = ${r}^(${p}-1-${a}) mod ${p} = ${t}`);
+    lines.push(`             m = ${t} × ${s} mod ${p} = ${decrypted}`);
+    lines.push(decrypted === BigInt(m) ? `<span class="ok">Coincide con el mensaje original.</span>` : `<span class="fail">No coincide, revisa que p sea primo.</span>`);
+    out.innerHTML = lines.join('\n');
+  } catch (err) {
+    out.innerHTML = '<span class="fail">Revisa que todos los campos sean números válidos.</span>';
+  }
+}
+</script>
+
+</body>
+</html>

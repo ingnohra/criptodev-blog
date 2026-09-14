@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Las dos llaves que resolvieron un problema de 1976 — CriptoDev</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">CriptoDev</a>
+  <ul class="entries">
+    <li><a href="entrada1.html" class="active">1</a></li>
+    <li><a href="entrada2.html">2</a></li>
+    <li><a href="entrada3.html">3</a></li>
+    <li><a href="entrada4.html">4</a></li>
+    <li><a href="entrada5.html">5</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="eyebrow-series">CriptoDev · Entrada 1 de 5</div>
+  <div class="entry-header">
+    <span class="seal">1</span>
+    <h1>Las dos llaves que resolvieron un problema de 1976</h1>
+  </div>
+
+  <h2>El problema que nadie sabía cómo resolver</h2>
+  <p>Todo cifrado simétrico arrastra la misma limitación, para cifrar y descifrar, ambas partes necesitan la misma clave secreta. Y esa clave hay que compartirla por algún canal. Si ese canal fuera seguro, ni siquiera haría falta cifrar nada por ahí, así que en la práctica, dos personas que nunca se han visto (piensa en una compra en línea con un vendedor al otro lado del mundo) no tienen forma de intercambiar esa clave sin que alguien la intercepte en el camino.</p>
+  <p>Este problema se quedó sin solución hasta 1976, cuando Whitfield Diffie y Martin Hellman publicaron <em>New directions in cryptography</em>. Ahí propusieron algo que hasta entonces sonaba casi contradictorio, dos personas podían llegar a compartir un secreto sin haberse puesto de acuerdo antes, y sin que quien intercepte todo el intercambio pueda calcularlo en un tiempo razonable (Hernández, 2016; Maillo, 2017). De ese artículo nace formalmente la criptografía asimétrica, o criptografía de clave pública.</p>
+
+  <h2>Dos llaves, una relación que solo funciona en un sentido</h2>
+  <p>En un criptosistema asimétrico cada usuario no genera una clave, sino dos, matemáticamente relacionadas entre sí (Maillo, 2017):</p>
+  <ul>
+    <li><strong>Clave pública</strong>: se distribuye libremente, cualquiera puede tenerla. Sirve para cifrar información dirigida a su dueño, o para verificar una firma hecha por él.</li>
+    <li><strong>Clave privada</strong>: se queda en secreto absoluto. Sirve para descifrar lo que llega cifrado con la pública, o para firmar.</li>
+  </ul>
+  <p>Lo que sostiene todo el sistema es una condición exigente, a partir de la clave pública debe ser computacionalmente inviable llegar a la privada. No es que sea difícil, es inviable con la tecnología actual, en un plazo que se cuenta en años que ni siquiera alcanzamos a imaginar (Hernández, 2016).</p>
+  <p>Esta relación tiene nombre propio, función de escotilla o <em>trapdoor function</em>. Es una operación fácil de calcular en un sentido (cifrar con la pública), pero imposible de invertir sin un dato adicional que actúa como escotilla, la clave privada. De ahí el nombre del criptosistema, y de ahí también la solución al problema original, porque ya no hace falta compartir ningún secreto por un canal inseguro, ya que lo único que circula ahí es información pública.</p>
+
+  <h2>Cómo funciona el protocolo de Diffie-Hellman</h2>
+  <p>El DHKA (<em>Diffie-Hellman Key Agreement</em>) no es, en sí, un criptosistema de cifrado, no encripta nada directamente. Es un protocolo de acuerdo de clave, al final ambas partes terminan compartiendo un valor que nadie más puede calcular, y que después usan como semilla para derivar una clave de cifrado (Hernández, 2016; Maillo, 2017).</p>
+  <p>Siguiendo a Alicia y Bernardo, los protagonistas de siempre en criptografía (Hernández, 2016):</p>
+  <ol>
+    <li>Se ponen de acuerdo públicamente en un grupo cíclico finito y un generador, valores que puede conocer cualquiera, incluido un atacante.</li>
+    <li>Cada uno elige, en privado y al azar, un número: Alicia elige <em>a</em>, Bernardo elige <em>b</em>. Nadie revela el suyo.</li>
+    <li>Cada uno calcula una potencia del generador con su número secreto y se la envía al otro por el canal inseguro.</li>
+    <li>Al recibir el valor del otro, cada uno lo eleva de nuevo a su propio secreto. Llegan al mismo número sin que ninguno haya conocido el secreto del otro.</li>
+  </ol>
+
+  <div class="demo" id="dh-demo">
+    <h3>Prueba el protocolo tú misma</h3>
+    <p style="margin-top:0; font-size:0.9rem; color:var(--ink-soft);">Cambia los valores y calcula. Los que aparecen por defecto son los del ejemplo del blog.</p>
+    <div class="demo-row">
+      <div class="demo-field"><label for="dh-g">Generador (g)</label><input id="dh-g" type="number" value="6"></div>
+      <div class="demo-field"><label for="dh-p">Módulo primo (p)</label><input id="dh-p" type="number" value="17"></div>
+    </div>
+    <div class="demo-row">
+      <div class="demo-field"><label for="dh-a">Secreto de Alicia (a)</label><input id="dh-a" type="number" value="5"></div>
+      <div class="demo-field"><label for="dh-b">Secreto de Bernardo (b)</label><input id="dh-b" type="number" value="10"></div>
+    </div>
+    <button onclick="calcularDH()">Calcular intercambio</button>
+    <div class="demo-output" id="dh-output">Presiona "Calcular intercambio" para ver los pasos.</div>
+    <p class="demo-note">Usa números pequeños con fines pedagógicos. En producción, p es un primo de cientos de dígitos.</p>
+  </div>
+
+  <p>Con números pequeños, para verlo en acción, si Alicia y Bernardo acuerdan g = 6 y p = 17, y Alicia elige a = 5 mientras Bernardo elige b = 10, Alicia calcula 6^5 mod 17 = 7 y se lo envía; Bernardo calcula 6^10 mod 17 = 15 y hace lo mismo. Al aplicar cada uno su propio secreto sobre lo que recibió, ambos llegan por separado a 2.</p>
+
+  <p>¿Y qué pasa si alguien intercepta ambos valores? Se enfrenta al problema del logaritmo discreto (DLP), es decir, calcular el exponente secreto a partir del generador y la potencia resultante (Hernández, 2016). Con números como los del ejemplo, trivial. Pero cuando p es un primo de cientos de dígitos, como se usa en la práctica, ese cálculo se vuelve inviable con la tecnología de hoy.</p>
+
+  <h2>Lo que el protocolo no resuelve, y cómo se maneja en el día a día del desarrollo</h2>
+  <p>El DHKA resuelve la distribución del secreto, pero deja una grieta muy concreta, no autentica a nadie. Un atacante puede interponerse entre cliente y servidor (ataque Man-in-the-Middle) si no hay forma de verificar quién es quién de verdad. Por eso ningún equipo serio implementa clave pública sin nada más alrededor, la combinan con certificados digitales (PKI) y firmas digitales, de modo que la clave pública del servidor queda firmada antes de acordar nada.</p>
+  <p>En la práctica, esto se traduce en reglas bastante concretas sobre cómo un equipo maneja sus claves:</p>
+  <ul>
+    <li>La <strong>pública</strong> no necesita protección especial, puede vivir en un archivo de configuración, en un certificado, o expuesta en un endpoint, sin riesgo.</li>
+    <li>La <strong>privada</strong> nunca debe tocar el control de versiones, ni los logs, ni el código fuente. Vive en un keystore o un gestor de secretos (Vault, AWS KMS) al que solo accede el servicio en tiempo de ejecución.</li>
+    <li>El acceso se reparte por responsabilidad, quien despliega no necesita (ni debería tener) acceso a la privada.</li>
+  </ul>
+  <p>En la próxima entrada vemos los algoritmos, RSA, ElGamal y curvas elípticas, que sostienen matemáticamente todo esto.</p>
+
+  <div class="references">
+    <p>Hernández, L. (2016). Criptografía de clave asimétrica. En <em>La criptografía</em> (pp. 93-134). Editorial CSIC Consejo Superior de Investigaciones Científicas.</p>
+    <p>Maillo Fernández, J. A. (2017). Seguridad de la información. En <em>Sistemas seguros de acceso y transmisión de datos</em> (pp. 76-102). RA-MA Editorial.</p>
+  </div>
+
+  <div class="entry-pager">
+    <a class="to-prev" href="index.html"><span>Volver</span>Inicio</a>
+    <a class="to-next" href="entrada2.html"><span>Siguiente</span>RSA, ElGamal y curvas elípticas →</a>
+  </div>
+</main>
+
+<footer>Proyecto académico — Seguridad en el Desarrollo de Software · UNIMINUTO</footer>
+
+<script src="js/crypto-utils.js"></script>
+<script>
+function calcularDH() {
+  const g = document.getElementById('dh-g').value;
+  const p = document.getElementById('dh-p').value;
+  const a = document.getElementById('dh-a').value;
+  const b = document.getElementById('dh-b').value;
+  const out = document.getElementById('dh-output');
+
+  try {
+    const A_pub = modPow(g, a, p);       // Alicia envía g^a mod p
+    const B_pub = modPow(g, b, p);       // Bernardo envía g^b mod p
+    const sharedFromA = modPow(B_pub, a, p); // Alicia calcula (g^b)^a
+    const sharedFromB = modPow(A_pub, b, p); // Bernardo calcula (g^a)^b
+
+    let lines = [];
+    lines.push(`Alicia envía: ${g}^${a} mod ${p} = ${A_pub}`);
+    lines.push(`Bernardo envía: ${g}^${b} mod ${p} = ${B_pub}`);
+    lines.push(`Alicia calcula: ${B_pub}^${a} mod ${p} = ${sharedFromA}`);
+    lines.push(`Bernardo calcula: ${A_pub}^${b} mod ${p} = ${sharedFromB}`);
+
+    if (sharedFromA === sharedFromB) {
+      lines.push(`<span class="ok">Clave compartida acordada: ${sharedFromA}</span>`);
+    } else {
+      lines.push(`<span class="fail">Los valores no coinciden, revisa que p sea primo.</span>`);
+    }
+    out.innerHTML = lines.join('\n');
+  } catch (e) {
+    out.innerHTML = '<span class="fail">Revisa que todos los campos sean números válidos.</span>';
+  }
+}
+</script>
+
+</body>
+</html>

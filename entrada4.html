@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSA en Java, del papel al código que sí compila — CriptoDev</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">CriptoDev</a>
+  <ul class="entries">
+    <li><a href="entrada1.html">1</a></li>
+    <li><a href="entrada2.html">2</a></li>
+    <li><a href="entrada3.html">3</a></li>
+    <li><a href="entrada4.html" class="active">4</a></li>
+    <li><a href="entrada5.html">5</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="eyebrow-series">CriptoDev · Entrada 4 de 5</div>
+  <div class="entry-header">
+    <span class="seal">4</span>
+    <h1>RSA en Java, del papel al código que sí compila</h1>
+  </div>
+
+  <p>Hasta acá vimos la teoría, cómo funciona RSA, por qué es seguro, y qué puede salir mal si se implementa mal. En esta entrada eso se vuelve código real, organizado siguiendo las fases del ciclo de vida del desarrollo de software (SDLC).</p>
+
+  <h2>Fase de diseño, modelar la amenaza antes de escribir código</h2>
+  <p>Antes de programar nada, un equipo responsable se pregunta qué puede salir mal. OWASP propone un proceso de modelado de amenazas de cuatro pasos (Conklin, s. f.) que aplico aquí a un caso concreto, una función que cifra documentos confidenciales (por ejemplo, un reporte PQRS) antes de enviarlos a un tercero.</p>
+  <ol>
+    <li><strong>Delimitar el trabajo</strong>: el activo a proteger es el contenido del documento y, sobre todo, la clave privada que lo descifra.</li>
+    <li><strong>Determinar las amenazas</strong>: con STRIDE, divulgación de información si la clave privada queda expuesta, y suplantación si alguien entrega una clave pública falsa.</li>
+    <li><strong>Determinar contramedidas</strong>: padding seguro y gestión de la clave privada fuera del código fuente.</li>
+    <li><strong>Evaluar el trabajo</strong>: verificar que exista evidencia de los tres pasos anteriores.</li>
+  </ol>
+
+  <h2>Fase de construcción, el código real</h2>
+  <p>Usé <code>KeyPairGenerator</code> para generar el par de claves, y <code>Cipher</code> con el modo OAEP en vez del PKCS1 clásico. El padding OAEP es justamente la contramedida frente al ataque de texto plano escogido que vimos en la Entrada 2.</p>
+
+<pre><code>import javax.crypto.Cipher;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Base64;
+
+public class RsaDemo {
+
+    public static void main(String[] args) throws Exception {
+        // 1. Generación segura del par de claves (2048 bits: mínimo recomendado)
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        keyGen.initialize(2048);
+        KeyPair keyPair = keyGen.generateKeyPair();
+
+        PublicKey publicKey = keyPair.getPublic();
+        PrivateKey privateKey = keyPair.getPrivate();
+
+        // 2. Cifrado con padding OAEP (NUNCA usar RSA/ECB/PKCS1Padding en produccion)
+        String mensajeOriginal = "Reporte PQRS confidencial - Direccion de Areas Protegidas";
+        Cipher cifrador = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        cifrador.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] textoCifrado = cifrador.doFinal(mensajeOriginal.getBytes("UTF-8"));
+
+        // 3. Descifrado con la clave privada
+        Cipher descifrador = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        descifrador.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] textoDescifrado = descifrador.doFinal(textoCifrado);
+
+        String mensajeRecuperado = new String(textoDescifrado, "UTF-8");
+        System.out.println("Mensaje descifrado: " + mensajeRecuperado);
+        System.out.println("Coincide: " + mensajeOriginal.equals(mensajeRecuperado));
+    }
+}</code></pre>
+
+  <div class="demo" id="webcrypto-demo">
+    <h3>Corre el mismo algoritmo, aquí mismo, en tu navegador</h3>
+    <p style="margin-top:0; font-size:0.9rem; color:var(--ink-soft);">Esto no es una simulación, es RSA-OAEP real ejecutado con la Web Crypto API nativa del navegador, el mismo algoritmo del código Java de arriba (2048 bits, OAEP con SHA-256).</p>
+    <div class="demo-row">
+      <div class="demo-field"><label for="wc-msg">Mensaje a cifrar</label><input id="wc-msg" type="text" value="Reporte PQRS confidencial"></div>
+    </div>
+    <button onclick="ejecutarDemoRSA()">Generar claves, cifrar y descifrar</button>
+    <button class="secondary" onclick="document.getElementById('wc-output').textContent=''">Limpiar</button>
+    <div class="demo-output" id="wc-output">Presiona el botón. La generación de una clave de 2048 bits puede tardar uno o dos segundos.</div>
+  </div>
+
+  <p>Dos decisiones de diseño no son casualidad, y conectan directo con la Entrada 2. <strong>2.048 bits, no menos</strong>, es el tamaño mínimo que tanto Hernández (2016) como Maillo (2017) señalan como aceptable hoy. <strong>Padding OAEP, no PKCS1 básico</strong>, sin un padding robusto RSA es determinístico (el mismo mensaje siempre da el mismo criptograma), lo que facilita ataques de texto plano escogido.</p>
+
+  <h2>Fase de despliegue, lo que el código nunca debe hacer</h2>
+  <p>El ejemplo genera las claves en memoria solo con fines demostrativos. En una aplicación real, la clave privada nunca debe quedar escrita en el código fuente, subirse al control de versiones, o aparecer en logs. En su lugar, como vimos en la Entrada 1, vive en un keystore o en un gestor de secretos (Vault, AWS Secrets Manager) al que el servicio accede en tiempo de ejecución.</p>
+
+  <div class="references">
+    <p>Conklin, L. (s. f.). <em>Threat modeling process</em>. OWASP Foundation. https://owasp.org/www-community/Threat_Modeling_Process</p>
+    <p>Hernández, L. (2016). Criptografía de clave asimétrica. En <em>La criptografía</em> (pp. 93-134). Editorial CSIC Consejo Superior de Investigaciones Científicas.</p>
+    <p>Maillo Fernández, J. A. (2017). Seguridad de la información. En <em>Sistemas seguros de acceso y transmisión de datos</em> (pp. 76-102). RA-MA Editorial.</p>
+  </div>
+
+  <div class="entry-pager">
+    <a class="to-prev" href="entrada3.html"><span>Anterior</span>← Simétrico vs. asimétrico</a>
+    <a class="to-next" href="entrada5.html"><span>Siguiente</span>Firma digital →</a>
+  </div>
+</main>
+
+<footer>Proyecto académico — Seguridad en el Desarrollo de Software · UNIMINUTO</footer>
+
+<script>
+async function ejecutarDemoRSA() {
+  const out = document.getElementById('wc-output');
+  const msg = document.getElementById('wc-msg').value || 'mensaje de prueba';
+  out.textContent = 'Generando par de claves RSA de 2048 bits...';
+
+  try {
+    const keyPair = await crypto.subtle.generateKey(
+      { name: 'RSA-OAEP', modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash: 'SHA-256' },
+      true,
+      ['encrypt', 'decrypt']
+    );
+
+    const encoded = new TextEncoder().encode(msg);
+    const ciphertext = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, keyPair.publicKey, encoded);
+    const decryptedBuf = await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, keyPair.privateKey, ciphertext);
+    const decrypted = new TextDecoder().decode(decryptedBuf);
+
+    const cipherBase64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext))).slice(0, 80) + '...';
+    const pubJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+
+    let lines = [];
+    lines.push(`Clave pública generada (módulo n, Base64Url, primeros 60 caracteres):`);
+    lines.push(pubJwk.n.slice(0, 60) + '...');
+    lines.push('');
+    lines.push(`Mensaje original: ${msg}`);
+    lines.push(`Cifrado (Base64): ${cipherBase64}`);
+    lines.push(`Descifrado: ${decrypted}`);
+    lines.push(decrypted === msg ? '<span class="ok">Coincide con el original: true</span>' : '<span class="fail">No coincide.</span>');
+    out.innerHTML = lines.join('\n');
+  } catch (err) {
+    out.innerHTML = '<span class="fail">Tu navegador no soporta esta operación, o hubo un error: ' + err.message + '</span>';
+  }
+}
+</script>
+
+</body>
+</html>
