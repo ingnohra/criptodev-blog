@@ -55,6 +55,19 @@
 
   <p>La seguridad del esquema descansa en el problema de la factorización, si un atacante pudiera factorizar n con facilidad, obtendría p y q, calcularía φ(n) y de ahí d, rompiendo el sistema (Hernández, 2016). Por eso la elección del tamaño de los primos no es un detalle de configuración cualquiera, es la decisión de diseño de la que depende toda la seguridad del sistema.</p>
 
+  <div class="video-embed">
+    <iframe
+      width="100%"
+      height="400"
+      src="https://www.youtube.com/embed/wXB-V_Keiu8"
+      title="Public Key Cryptography: RSA Encryption Algorithm"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+    <p class="video-caption">Explicación visual de cómo funciona el algoritmo RSA paso a paso.</p>
+  </div>
+  
   <h2>ElGamal, el mismo logaritmo discreto que ya conocemos</h2>
   <p>A diferencia de RSA, ElGamal no depende de la factorización sino del problema del logaritmo discreto (DLP), el mismo que vimos con Diffie-Hellman en la entrada pasada (Hernández, 2016). Alicia elige un primo p y un generador g, escoge su clave privada a, y calcula su pública A = g^a mod p. Para cifrar, Bernardo elige un número aleatorio x, calcula r = g^x mod p y s = m·A^x mod p, y envía el par (r, s).</p>
 
